@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeNest Registration Page</title>
+    <style>
+     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-image: url("loginpageBG.png");
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.form-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.header {
+    font-size: 24px;
+    color: #9b59b6;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.highlight {
+    font-size: 24px;
+    color: #ffffff;
+    background-color: #9b59b6;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #6a2c90;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.input-container {
+    position: relative;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+input {
+    width: 100%;
+    padding: 10px 10px 10px 0;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+    background: transparent;
+    color: #333;
+}
+
+input:focus {
+    border-bottom-color: #9b59b6;
+}
+
+.input-container label {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    font-size: 16px;
+    color: #999;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+input:focus + label,
+input:not(:placeholder-shown) + label {
+    top: -20px;
+    font-size: 14px;
+    color: #9b59b6;
+}
+
+.show-password {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #9b59b6;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #9b59b6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+button:hover {
+    background-color: #6a2c90;
+}
+
+.link {
+    display: block;
+    margin: 10px 0;
+    color: #9b59b6;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+
+.link:hover {
+    color: #6a2c90;
+    text-decoration: underline;
+}
+    </style>
+    <script type="module" src="firebaseA.js"></script> <!-- Firebase file include -->
+</head>
+<body>
+    <div class="form-container">
+        <div class="header">Welcome to <span class="highlight">Fruit Ninja</span></div>
+        <h2 id="formTitle">Registration</h2>
+        <form id="mainForm">
+            <div id="formContent">
+                <!-- Registration form fields -->
+                <div class="input-container">
+                    <input type="text" id="name" name="name" required placeholder=" ">
+                    <label for="name">Full Name</label>
+                </div>
+                <div class="input-container">
+                    <input type="email" id="email" name="email" required placeholder=" ">
+                    <label for="email">Email</label>
+                </div>
+                <div class="input-container">
+                    <input type="password" id="password" name="password" required placeholder=" ">
+                    <label for="password">Password</label>
+                </div>
+                <div class="input-container" id="confirmPasswordContainer">
+                    <input type="password" id="confirm-password" name="confirm-password" required placeholder=" ">
+                    <label for="confirm-password">Confirm Password</label>
+                </div>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+        <a class="link" id="toggleLink">Already have an account? Login</a>
+    </div>
+
+    <script type="module">
+        // Import Firebase functions
+        import { registerUser, loginUser } from "./firebaseA.js";
+
+        const formTitle = document.getElementById("formTitle");
+        const formContent = document.getElementById("formContent");
+        const toggleLink = document.getElementById("toggleLink");
+        const mainForm = document.getElementById("mainForm");
+        const confirmPasswordContainer = document.getElementById("confirmPasswordContainer");
+
+        // Form toggle logic
+        toggleLink.addEventListener("click", () => {
+            if (formTitle.textContent === "Registration") {
+                // Change to Login form
+                formTitle.textContent = "Login";
+                confirmPasswordContainer.style.display = "none"; // Hide confirm password field
+                mainForm.querySelector("button").textContent = "Login";
+                toggleLink.textContent = "Don't have an account? Sign Up";
+            } else {
+                // Change back to Registration form
+                formTitle.textContent = "Registration";
+                confirmPasswordContainer.style.display = "block"; // Show confirm password field
+                mainForm.querySelector("button").textContent = "Sign Up";
+                toggleLink.textContent = "Already have an account? Login";
+            }
+        });
+
+        // Form submission handler
+        mainForm.addEventListener("submit", (e) => {
+            e.preventDefault(); // Prevent form from reloading the page
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            if (formTitle.textContent === "Registration") {
+                const confirmPassword = document.getElementById("confirm-password").value;
+
+                if (password !== confirmPassword) {
+                    alert("Passwords do not match!");
+                    return;
+                }
+
+                // Call Firebase registration function
+                registerUser(email, password);
+            } else {
+                // Call Firebase login function
+                loginUser(email, password);
+            }
+        })
+        document.getElementById("mainForm").addEventListener("submit", function(event) {
+    event.preventDefault();  // Form ko submit hone se rokna
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if (formTitle.textContent === "Registration") {
+        const confirmPassword = document.getElementById("confirm-password").value;
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        // Registration
+        registerUser(email, password)
+            .then((userCredential) => {
+                console.log("User Registered: ", userCredential.user);
+                window.location.href = "index.html"; // Redirect to the main website page
+            })
+            .catch((error) => {
+                console.error("Registration Error: ", error.message);
+                alert(error.message);
+            });
+    } else if (formTitle.textContent === "Login") {
+        // Login
+        loginUser(email, password)
+            .then((userCredential) => {
+                console.log("User Logged In: ", userCredential.user);
+                window.location.href = "index.html"; // Redirect to the main website page
+            })
+            .catch((error) => {
+                console.error("Login Error: ", error.message);
+                alert(error.message);
+            });
+    }
+});
+
+    </script>
+</body>
+</html>
